@@ -1,0 +1,174 @@
+class Course:
+    def __init__(self, code, title, description, capacity, schedule):
+        self.code = code
+        self.title = title
+        self.description = description
+        self.capacity = capacity
+        self.schedule = schedule
+        self.enrolled_students = []
+
+    def is_full(self):
+        return len(self.enrolled_students) >= self.capacity
+
+    def enroll_student(self, student_id):
+        if not self.is_full():
+            self.enrolled_students.append(student_id)
+            return True
+        return False
+
+    def remove_student(self, student_id):
+        if student_id in self.enrolled_students:
+            self.enrolled_students.remove(student_id)
+            return True
+        return False
+
+    def __str__(self):
+        return f"{self.code}: {self.title} ({self.schedule}) - Capacity: {len(self.enrolled_students)}/{self.capacity}"
+
+
+class Student:
+    def __init__(self, student_id, name):
+        self.student_id = student_id
+        self.name = name
+        self.registered_courses = []
+
+    def register_course(self, course_code):
+        self.registered_courses.append(course_code)
+
+    def remove_course(self, course_code):
+        if course_code in self.registered_courses:
+            self.registered_courses.remove(course_code)
+
+    def __str__(self):
+        return f"ID: {self.student_id}, Name: {self.name}"
+
+
+class CourseDatabase:
+    def __init__(self):
+        self.courses = {}
+
+    def add_course(self, course):
+        self.courses[course.code] = course
+
+    def get_course(self, course_code):
+        return self.courses.get(course_code)
+
+    def list_available_courses(self):
+        print("\nAvailable Courses:")
+        for course in self.courses.values():
+            print(course)
+
+    def list_all_courses(self):
+        print("\nAll Courses:")
+        for course in self.courses.values():
+            print(course)
+
+
+
+class StudentDatabase:
+    def __init__(self):
+        self.students = {}
+
+    def add_student(self, student):
+        self.students[student.student_id] = student
+
+    def get_student(self, student_id):
+        return self.students.get(student_id)
+
+    def list_all_students(self):
+        print("\nAll Students:")
+        for student in self.students.values():
+            print(student)
+
+
+class CourseRegistrationSystem:
+    def __init__(self):
+        self.course_db = CourseDatabase()
+        self.student_db = StudentDatabase()
+
+    def run(self):
+       
+        self.course_db.add_course(Course("CS101", "Intro to Programming", "...", 30, "Mon 9:00 AM"))
+        self.course_db.add_course(Course("MATH101", "Calculus I", "...", 25, "Tue 10:00 AM"))
+        self.student_db.add_student(Student("S001", "Alice"))
+        self.student_db.add_student(Student("S002", "Bob"))
+
+        while True:
+            self.display_menu()
+            try:
+                choice = int(input("Enter your choice: "))
+                if choice == 1:
+                    self.course_db.list_available_courses()
+                elif choice == 2:
+                    self.register_student_for_course()
+                elif choice == 3:
+                    self.remove_student_from_course()
+                elif choice == 4:
+                    self.student_db.list_all_students()
+                elif choice == 5:
+                    self.course_db.list_all_courses()
+                elif choice == 6:
+                    print("Exiting...")
+                    break
+                else:
+                    print("Invalid choice. Please try again.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+
+
+    def display_menu(self):
+        print("\nCourse Registration System")
+        print("1. List Available Courses")
+        print("2. Register for a Course")
+        print("3. Drop a Course")
+        print("4. List All Students")
+        print("5. List All Courses")
+        print("6. Exit")
+
+    def register_student_for_course(self):
+        student_id = input("Enter student ID: ")
+        student = self.student_db.get_student(student_id)
+
+        if student is None:
+            print("Student not found.")
+            return
+
+        course_code = input("Enter course code to register for: ")
+        course = self.course_db.get_course(course_code)
+
+        if course is None:
+            print("Course not found.")
+            return
+
+        if course.enroll_student(student_id):
+            student.register_course(course_code)
+            print("Registration successful.")
+        else:
+            print("Course is full or student is already registered.")
+
+    def remove_student_from_course(self):
+        student_id = input("Enter student ID: ")
+        student = self.student_db.get_student(student_id)
+
+        if student is None:
+            print("Student not found.")
+            return
+
+        course_code = input("Enter course code to drop: ")
+        course = self.course_db.get_course(course_code)
+
+        if course is None:
+            print("Course not found.")
+            return
+
+        if course.remove_student(student_id):
+            student.remove_course(course_code)
+            print("Course dropped successfully.")
+        else:
+            print("Student is not registered for this course.")
+
+
+
+if __name__ == "__main__":
+    system = CourseRegistrationSystem()
+    system.run()
